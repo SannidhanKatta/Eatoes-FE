@@ -5,8 +5,9 @@ import { CheckCircleIcon } from '@heroicons/react/24/outline';
 function OrderConfirmation() {
     const { orderId } = useParams();
     const { currentOrder } = useSelector((state) => state.order);
+    const orderData = currentOrder?.data;
 
-    if (!currentOrder) {
+    if (!orderData) {
         return (
             <div className="max-w-2xl mx-auto text-center py-12">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Order Information Not Available</h2>
@@ -46,14 +47,14 @@ function OrderConfirmation() {
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">Order Details</h3>
                         <p className="text-gray-600">Order #{orderId}</p>
-                        <p className="text-gray-600">Name: {currentOrder.customerName}</p>
-                        <p className="text-gray-600">Phone: {currentOrder.phoneNumber}</p>
+                        <p className="text-gray-600">Name: {orderData.customerName}</p>
+                        <p className="text-gray-600">Phone: {orderData.phoneNumber}</p>
                     </div>
 
                     <div className="border-t border-gray-200 pt-4 mb-4">
                         <h4 className="font-medium text-gray-800 mb-2">Order Items:</h4>
                         <ul className="space-y-2">
-                            {currentOrder.items.map((item, index) => (
+                            {orderData.items.map((item, index) => (
                                 <li key={index} className="flex justify-between text-gray-600">
                                     <span>{item.quantity}x {item.name}</span>
                                     <span>₹{(item.price * item.quantity)}</span>
@@ -65,14 +66,14 @@ function OrderConfirmation() {
                     <div className="border-t border-gray-200 pt-4">
                         <div className="flex justify-between font-medium">
                             <span>Total Amount:</span>
-                            <span>₹{currentOrder.totalAmount}</span>
+                            <span>₹{orderData.totalAmount}</span>
                         </div>
                     </div>
 
-                    {currentOrder.notes && (
+                    {orderData.notes && (
                         <div className="border-t border-gray-200 mt-4 pt-4">
                             <h4 className="font-medium text-gray-800 mb-2">Special Instructions:</h4>
-                            <p className="text-gray-600">{currentOrder.notes}</p>
+                            <p className="text-gray-600">{orderData.notes}</p>
                         </div>
                     )}
                 </div>

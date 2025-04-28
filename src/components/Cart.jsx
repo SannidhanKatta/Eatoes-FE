@@ -52,7 +52,7 @@ function Cart() {
 
             const result = await dispatch(placeOrder(orderData)).unwrap();
             dispatch(clearCart());
-            navigate(`/order-confirmation/${result.id}`);
+            navigate(`/order-confirmation/${result.data.id}`);
         } catch (err) {
             setError(err.message || 'Failed to place order. Please try again.');
         } finally {
