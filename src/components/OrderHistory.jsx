@@ -2,22 +2,56 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrderHistory } from '../store/orderSlice';
 import { PhoneIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 function OrderHistory() {
     const dispatch = useDispatch();
     const { orderHistory, status, error } = useSelector((state) => state.order);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [validationError, setValidationError] = useState('');
+
+    const validatePhoneNumber = (number) => {
+        const cleaned = number.replace(/\D/g, '');
+        if (cleaned.length !== 10) {
+            return 'Phone number must be exactly 10 digits';
+        }
+        if (/^(\d)\1{9}$/.test(cleaned)) {
+            return 'Invalid phone number pattern';
+        }
+        return null;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Validate phone number
+        const error = validatePhoneNumber(phoneNumber);
+        if (error) {
+            setValidationError(error);
+            return;
+        }
+
         setIsSearching(true);
+        setValidationError('');
+        
         try {
-            await dispatch(fetchOrderHistory(phoneNumber)).unwrap();
+            // Clean phone number before sending
+            const cleanedPhoneNumber = phoneNumber.replace(/\D/g, '');
+            await dispatch(fetchOrderHistory(cleanedPhoneNumber)).unwrap();
         } catch (err) {
+            const errorMessage = err.response?.data?.errors?.[0]?.message || err.message || 'Failed to fetch order history';
+            toast.error(errorMessage);
             console.error('Failed to fetch order history:', err);
         } finally {
             setIsSearching(false);
+        }
+    };
+
+    const handlePhoneNumberChange = (e) => {
+        setPhoneNumber(e.target.value);
+        if (validationError) {
+            setValidationError('');
         }
     };
 
@@ -46,12 +80,17 @@ function OrderHistory() {
                                 id="phoneNumber"
                                 name="phoneNumber"
                                 value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                onChange={handlePhoneNumberChange}
                                 required
-                                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
-                                placeholder="Enter phone number"
+                                placeholder="10-digit phone number"
+                                className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base ${
+                                    validationError ? 'border-red-300' : 'border-gray-300'
+                                }`}
                             />
                         </div>
+                        {validationError && (
+                            <p className="mt-1 text-sm text-red-600">{validationError}</p>
+                        )}
                     </div>
                     <button
                         type="submit"
