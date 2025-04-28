@@ -24,7 +24,7 @@ function OrderHistory() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validate phone number
         const error = validatePhoneNumber(phoneNumber);
         if (error) {
@@ -34,15 +34,20 @@ function OrderHistory() {
 
         setIsSearching(true);
         setValidationError('');
-        
+
         try {
             // Clean phone number before sending
             const cleanedPhoneNumber = phoneNumber.replace(/\D/g, '');
+            console.log('Attempting to fetch orders for:', cleanedPhoneNumber);
             await dispatch(fetchOrderHistory(cleanedPhoneNumber)).unwrap();
         } catch (err) {
             const errorMessage = err.response?.data?.errors?.[0]?.message || err.message || 'Failed to fetch order history';
+            console.error('Order history fetch error:', {
+                error: err,
+                response: err.response,
+                message: errorMessage
+            });
             toast.error(errorMessage);
-            console.error('Failed to fetch order history:', err);
         } finally {
             setIsSearching(false);
         }
@@ -83,9 +88,8 @@ function OrderHistory() {
                                 onChange={handlePhoneNumberChange}
                                 required
                                 placeholder="10-digit phone number"
-                                className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base ${
-                                    validationError ? 'border-red-300' : 'border-gray-300'
-                                }`}
+                                className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base ${validationError ? 'border-red-300' : 'border-gray-300'
+                                    }`}
                             />
                         </div>
                         {validationError && (
